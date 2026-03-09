@@ -38,3 +38,29 @@ def find_tag(items, target):
         if item["tag"].upper() == target.upper():
             return item
     return None
+
+from .tags import tag_name
+
+
+def build_tlv_tree(data):
+    nodes = []
+    parsed = parse_tlv(data)
+
+    for item in parsed:
+        node = {
+            "tag": item["tag"],
+            "name": tag_name(item["tag"]),
+            "length": item["length"],
+            "value": item["value"],
+            "children": []
+        }
+
+        if item["value"] and item["value"][0] & 0x20:
+            try:
+                node["children"] = build_tlv_tree(item["value"])
+            except Exception:
+                pass
+
+        nodes.append(node)
+
+    return nodes
